@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>PubRTC + Mobile</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+	    #vid-box, #vid-thumb {
+		    text-align: center;
+	    }
+	    
+	    #vid-box video {
+		    margin 0 auto;
+		    width: 300px;
+	    }
+
+	    #vid-thumb, #vid-thumb video{
+		    width: 200px;
+		    display: block;
+		    margin: 0 auto;
+	    }
+    </style>
+    
+</head>
+<body>
+
+<!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
+<!-- My Phone Number & Dial Areas -->
+<!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
+<div id="vid-box"></div>
+<div id="vid-thumb"></div>
+
+<form name="loginForm" id="login" action="#" onsubmit="return login(this);">
+    <input type="text" name="username" id="username" placeholder="Pick a username!" />
+    <input type="submit" name="login_submit" value="Log In">
+</form>
+
+
+<form name="callForm" id="call" action="#" onsubmit="return makeCall(this);">
+	<input type="text" name="number" placeholder="Enter user to dial!" />
+	<input type="submit" value="Call"/>
+</form>
+
+<div id="inCall">
+	<button onclick="end()">End</button> <button onclick="mute()">Mute</button>
+</div>
+<div id="logs"></div>
+
+<!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+<!-- WebRTC Peer Connections -->
+<!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://cdn.pubnub.com/pubnub-dev.js"></script>
+<script src="js/webrtc.js"></script>
+<script src="js/rtc-controller.js"></script>
+
+<script type="text/javascript">
+
+var video_out = document.getElementById("vid-box");
+var vid_thumb = document.getElementById("vid-thumb");
+
+function login(form) {
+	var phone = window.phone = PHONE({
+	    number        : username.value || "Anonymous", // listen on username line else Anonymous
+	    publish_key   : 'pub-c-561a7378-fa06-4c50-a331-5c0056d0163c', // Your Pub Key
+	    subscribe_key : 'sub-c-17b7db8a-3915-11e4-9868-02ee2ddab7fe', // Your Sub Key
+	});
+	var ctrl = window.ctrl = CONTROLLER(phone);
+	ctrl.ready(function(){
+		form.username.style.background="#55ff5b"; 
+		form.login_submit.hidden="true"; 
+		ctrl.registerThumbnailHolder(vid_thumb);
+		addLog("Logged in as " + username.value); 
+	});
+	ctrl.receive(function(session){
+	    session.connected(function(session){ video_out.appendChild(session.video); addLog(session.number + " has joined."); }); //ctrl.postAuth(session, auth, newCall) });
+	    session.ended(function(session) { $('*[data-number="'+session.number+'"]').remove(); addLog(session.number + " has left."); });
+	});
+	return false;
+}
+
+function makeCall(form){
+	if (!window.phone) alert("Login First!");
+	var num = form.number.value;
+	if (phone.number()==num) return false; // No calling yourself!
+	ctrl.isOnline(num, function(isOn){
+		if (isOn) ctrl.dial(num);
+		else alert("User if Offline");
+	});
+	return false;
+}
+
+function mute(){
+	ctrl.toggleMute();
+}
+
+function end(){
+	ctrl.hangup();
+}
+
+function addLog(log){
+	$('#logs').append("<p>"+log+"</p>");
+}
+
+</script>
+</body>
+</html>
