@@ -21,9 +21,13 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	var readycb   = function(session){};
     var receivecb = function(session){};
+    var videotogglecb = function(session, isEnabled){};
+    var audiotogglecb = function(session, isEnabled){};
     
     CONTROLLER.ready   = function(cb) { readycb   = cb };
     CONTROLLER.receive = function(cb) { receivecb = cb };
+    CONTROLLER.videoToggled = function(cb) { videotogglecb = cb };
+    CONTROLLER.audioToggled = function(cb) { audiotogglecb = cb };
 	
 	phone.ready(function(){ readycb() });
 	phone.receive(function(session){
@@ -64,7 +68,6 @@ transform: scale(-1, 1); filter: FlipH;";
 	    CONTROLLER.broadcast(thumbnailHolder);
     };
 	
-	
 	CONTROLLER.dial = function(number){ // Authenticate here??
 		var session = phone.dial(number, get_xirsys_servers()); // Dial Number
 		if (!session) return; // No Duplicate Dialing Allowed
@@ -82,11 +85,26 @@ transform: scale(-1, 1); filter: FlipH;";
 		}
 	};
 	
-	CONTROLLER.toggleMute = function(){
+	CONTROLLER.toggleAudio = function(){
+		var audio = false;
 		var audioTracks = window.phone.mystream.getAudioTracks();
 		for (var i = 0, l = audioTracks.length; i < l; i++) {
 			audioTracks[i].enabled = !audioTracks[i].enabled;
+			audio = audioTracks[i].enabled;
 		}
+		publishCtrlAll("userAudio", {user : phone.number(), audio:audio}); // Stream false if paused
+		return audio;
+	};
+	
+	CONTROLLER.toggleVideo = function(){
+		var video = false;
+		var videoTracks = window.phone.mystream.getVideoTracks();
+		for (var i = 0, l = videoTracks.length; i < l; i++) {
+			videoTracks[i].enabled = !videoTracks[i].enabled;
+			video = videoTracks[i].enabled;
+		}
+		publishCtrlAll("userVideo", {user : phone.number(), video:video}); // Stream false if paused
+		return video;
 	};
 	
 	CONTROLLER.isOnline = function(number, cb){
@@ -109,10 +127,7 @@ transform: scale(-1, 1); filter: FlipH;";
 		} else {  				// New User added to stream/group
 			if (idx == -1) {  	// Tell everyone in array of new user first, then add to array. 
 				if (!isStream) { 
-					for (var i=0; i < userArray.length; i++) {
-						var cChan = controlChannel(userArray[i].number);
-						publishCtrl(cChan, "userJoin", session.number);
-					}
+					publishCtrlAll("userJoin", session.number);
 				}
 				userArray.push(session);
 			}
@@ -124,6 +139,13 @@ transform: scale(-1, 1); filter: FlipH;";
 	function addToGroupChat(number){
 		var session = phone.dial(number, get_xirsys_servers()); // Dial Number
 		if (!session) return; 	// No Dupelicate Dialing Allowed
+	}
+	
+	function publishCtrlAll(type, data){
+		for (var i=0; i < userArray.length; i++) {
+			var cChan = controlChannel(userArray[i].number);
+			publishCtrl(cChan, type, data);
+		}
 	}
 	
 	function publishCtrl(ch, type, data){
@@ -152,6 +174,18 @@ transform: scale(-1, 1); filter: FlipH;";
 		case "userLeave":
 			var idx = findWithAttr(userArray, "number", m.data);
 			if (idx != -1) userArray.splice(idx, 1)[0];
+			break;
+		case "userVideo":
+			var idx = findWithAttr(userArray, "number", m.data.user);
+			var vidEnabled = m.data.video;
+			if (idx != -1)
+				videotogglecb(userArray[idx], vidEnabled);
+			break;
+		case "userAudio":
+			var idx = findWithAttr(userArray, "number", m.data.user);
+			var audEnabled = m.data.audio;
+			if (idx != -1)
+				audiotogglecb(userArray[idx], audEnabled);
 			break;
 		}
 		console.log(m);

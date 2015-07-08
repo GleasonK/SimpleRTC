@@ -6,96 +6,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
 	    #vid-box video{
-		    background: black;
-		    height: 300px;
-		    width: 300px;
+		    width: 400px;
 	    }
     </style>
     
 </head>
 <body>
 
-<!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
-<!-- My Phone Number & Dial Areas -->
-<!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
-<div id="vid-box"></div>
+	<div id="vid-box"></div>
+	
+	<form name="loginForm" id="login" action="#" onsubmit="return login(this);">
+	    <input type="text" name="username" id="username" placeholder="Pick a username!" />
+	    <input type="submit" name="login_submit" value="Log In">
+	</form>
+	
+	
+	<form name="callForm" id="call" action="#" onsubmit="return makeCall(this);">
+		<input type="text" name="number" placeholder="Enter user to dial!" />
+		<input type="submit" value="Call"/>
+	</form>
 
-<form name="loginForm" id="login" action="#" onsubmit="return login(this);">
-    <input type="text" name="username" id="username" placeholder="Pick a username!" />
-    <input type="submit" name="login_submit" value="Log In">
-</form>
+</body>
 
-
-<form name="callForm" id="call" action="#" onsubmit="return makeCall(this);">
-	<input type="text" name="number" placeholder="Enter user to dial!" />
-	<input type="submit" value="Call"/>
-</form>
-
-
-
-
-<!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
-<!-- WebRTC Peer Connections -->
-<!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-<script src="https://cdn.pubnub.com/pubnub-dev.js"></script>
+<script src="https://cdn.pubnub.com/pubnub.min.js"></script>
 <script src="js/webrtc.js"></script>
-
 <script type="text/javascript">
 
 var video_out = document.getElementById("vid-box");
+var hasRTC = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 
 function login(form) {
-	try {
-		var phone = window.phone = PHONE({
-		    number        : username.value || "Anonymous", // listen on username line else Anonymous
-		    publish_key   : 'pub-c-561a7378-fa06-4c50-a331-5c0056d0163c', // Your Pub Key
-		    subscribe_key : 'sub-c-17b7db8a-3915-11e4-9868-02ee2ddab7fe', // Your Sub Key
-		});	
-		phone.ready(function(){form.username.style.background="#55ff5b"; form.login_submit.hidden="true"; });
-		phone.receive(function(session){
-		    session.connected(function(session) { video_out.appendChild(session.video); });
-		    session.ended(function(session) { video_out.innerHTML=''; });
-		});
-	} catch (err) {
-		alert("Only works in Chrome, Firefox, and Opera browsers, " + err);
-	}
+	var phone = window.phone = PHONE({
+	    number        : form.username.value || "Anonymous", // listen on username line else Anonymous
+	    publish_key   : 'pub-c-561a7378-fa06-4c50-a331-5c0056d0163c', // Your Pub Key
+	    subscribe_key : 'sub-c-17b7db8a-3915-11e4-9868-02ee2ddab7fe', // Your Sub Key
+	});	
+	phone.ready(function(){form.username.style.background="#55ff5b"; form.login_submit.hidden="true"; });
+	phone.receive(function(session){
+	    session.connected(function(session) { video_out.appendChild(session.video); });
+	    session.ended(function(session) { video_out.innerHTML=''; });
+	});
 	return false;
 }
 
 function makeCall(form){
 	if (!window.phone) alert("Login First!");
-	else dial(form.number.value);
+	else phone.dial(form.number.value);
 	return false;
 }
 
-// Start Phone Call
-function dial(number) {
-    var session = phone.dial(number, get_xirsys_servers()); // Dial Number
-    if (!session) return; // No Dupelicate Dialing Allowed
-}
-
-function get_xirsys_servers() {
-    var servers;
-    $.ajax({
-        type: 'POST',
-        url: 'https://api.xirsys.com/getIceServers',
-        data: {
-            room: 'default',
-            application: 'default',
-            domain: 'www.pubnub-example.com',
-            ident: 'pubnub',
-            secret: 'dec77661-9b0e-4b19-90d7-3bc3877e64ce',
-        },
-        success: function(res) {
-            res = JSON.parse(res);
-            if (!res.e) servers = res.d.iceServers;
-        },
-        async: false
-    });
-    return servers;
-}
-
 </script>
-</body>
 </html>

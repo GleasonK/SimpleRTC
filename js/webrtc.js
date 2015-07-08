@@ -377,7 +377,7 @@ var PHONE = window.PHONE = function(config) {
     // Listen For New Incoming Calls
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function subscribe() {
-	    console.log("Subscribed!");
+	    console.log("Subscribed to " + config.number);
         pubnub.subscribe({
             restore    : true,
             channel    : config.number,
