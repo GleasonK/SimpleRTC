@@ -25,6 +25,10 @@
 		<input type="text" name="number" placeholder="Enter user to dial!" />
 		<input type="submit" value="Call"/>
 	</form>
+	
+	<p><b>To Use:</b></p>
+	<p>Type a username and click Log in. If input turns green you are ready to receive/place a call.</p>
+	<p>In a separate browser window, log in with a different username, and place a call to the first.</p>
 
 </body>
 
@@ -34,7 +38,6 @@
 <script type="text/javascript">
 
 var video_out = document.getElementById("vid-box");
-var hasRTC = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
 
 function login(form) {
 	var phone = window.phone = PHONE({

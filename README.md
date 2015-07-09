@@ -24,7 +24,7 @@ WebRTC is widely adopted by popular browsers such as Chrome and Firefox, but the
 
 ## Part 1: A Simple WebRTC Video Chat
 
-Time to begin! First I will show you how to make the bare minimum WebRTC video chat. Then, in Part 2 we will make use of a simple wrapper library to create a full featured video chatting application.
+Time to begin! First I will show you how to make the bare minimum WebRTC video chat. Then, in Part 2 we will make use of a simple wrapper library to create a full featured video chatting application. The live demo of what you will be making in the next 2.5 minutes [can be found here](http://kevingleason.me/SimpleRTC/minivid.html)!
 
 ### A Note on Testing and Debugging
 
@@ -120,6 +120,8 @@ function makeCall(form){
 ```
 
 If `window.phone` is undefined, we cannot place a call. This will happen if the user did not log in first. If it is, we use the `phone.dial` function which takes a number and an optional list of servers to place a call.
+
+<img src="img/chat.png" alt="Chatting">
 
 And that is it! You now have a simple WebRTC chatting app, fire up your python server and go test your app on localhost!
 
