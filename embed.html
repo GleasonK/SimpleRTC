@@ -4,6 +4,7 @@
 		#vid-box{
 			width: 100%;
 			height: 100%;
+			text-align: center;
 		}
 		
 		#vid-box video{
@@ -83,7 +84,7 @@ function urlparams() {
 }
 
 function handleNoStream(){
-	video_out.innerHTML="<h1>That stream no longer exists!</h1>";
+	video_out.innerHTML="<h2>That stream no longer exists!</h2>";
 	stream_info.hidden=true;
 }
 

@@ -141,6 +141,12 @@ function addLog(log){
 	$('#logs').append("<p>"+log+"</p>");
 }
 
+function end(){
+	if (!window.phone) return;
+	phone.hangup();
+	phone.pubnub.unsubscribe(phone.number());
+}
+
 function genEmbed(w,h){
 	if (!streamName) return;
 	var url = "http://kevingleason.me/SimpleRTC/embed.html?stream=" + streamName;
@@ -148,6 +154,7 @@ function genEmbed(w,h){
 	embed.src    = url;
 	embed.width  = w;
 	embed.height = h;
+	embed.frameborder=0;
 	embed_demo.innerHTML = embed.outerHTML;
 	embed_code.innerHTML = '';
 	embed_code.appendChild(document.createTextNode(embed.outerHTML));
