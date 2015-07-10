@@ -121,7 +121,7 @@ function watch(form){
 	    session.ended(function(session) { addLog(session.number + " has left."); });
 	});
 	ctrl.streamPresence(function(m){
-		console.log(m);
+		$('#here-now').html(m.occupancy+'');
 		addLog(m.occupancy + " currently watching.");
 	});
 	return false;

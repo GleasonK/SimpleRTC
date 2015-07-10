@@ -221,7 +221,6 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
 			callAuth(m.data);
 			break;
 		case "userJoin":
-			alert(isStream);
 			if (isStream) add_to_stream(m.data); // JOIN STREAM HERE!
 			else add_to_group(m.data);
 			break;
