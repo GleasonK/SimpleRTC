@@ -67,6 +67,7 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
         video.volume = 0.0;
         video.play();
 	    //vid.innerHTML=""
+	    vid.setAttribute( 'autoplay', 'autoplay' );
 	    vid.setAttribute( 'data-number', phone.number() );
 	    vid.style.cssText ="-moz-transform: scale(-1, 1); \
 						 	-webkit-transform: scale(-1, 1); -o-transform: scale(-1, 1); \

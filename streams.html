@@ -90,7 +90,7 @@ function stream(form) {
 		addLog("Streaming to " + streamName); 
 	});
 	ctrl.receive(function(session){
-	    session.connected(function(session){ session.pc.close(); addLog(session.number + " has joined."); });
+	    session.connected(function(session){ addLog(session.number + " has joined."); });
 	    session.ended(function(session) { addLog(session.number + " has left."); console.log(session)});
 	});
 	ctrl.streamPresence(function(m){

@@ -16,7 +16,7 @@ var PHONE = window.PHONE = function(config) {
     var myconnection  = false;
     var mediaconf     = config.media || { audio : true, video : true };
     var conversations = {};
-    var streamWatch   = config.streamWatch || false;
+    var oneway        = config.oneway || false;
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // RTC Peer Connection Session (one per call)
@@ -403,7 +403,7 @@ var PHONE = window.PHONE = function(config) {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function onready(subscribed) {
         if (subscribed) myconnection = true;
-        if (!((mystream || streamWatch) && myconnection)) return;
+        if (!((mystream || oneway) && myconnection)) return;
         
         connectcb();
         readycb();
@@ -413,7 +413,7 @@ var PHONE = window.PHONE = function(config) {
     // Prepare Local Media Camera and Mic
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function getusermedia() { //Do something if not requesting any media?
-        if (streamWatch){
+        if (oneway){
 	        onready();
 	        subscribe();
             return;
