@@ -189,8 +189,9 @@ var PHONE = window.PHONE = function(config) {
             talk.message   = function(cb) {talk.usermsg = cb; return talk};
 
             // Add Local Media Streams Audio Video Mic Camera
-            if (!isAnswer)
-	            talk.pc.addStream(mystream);   // Add null here on the receiving end of streaming to go one-way.
+            //  If answering and oneway streaming, do not attach stream
+            if (!isAnswer || !oneway) 
+            	talk.pc.addStream(mystream);   // Add null here on the receiving end of streaming to go one-way.
 
             // Notify of Call Status
             update_conversation( talk, 'connecting' );
@@ -415,6 +416,7 @@ var PHONE = window.PHONE = function(config) {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function getusermedia() { //Do something if not requesting any media?
         if (oneway){
+	        if (!PeerConnection){ return unablecb(); }
 	        onready();
 	        subscribe();
             return;

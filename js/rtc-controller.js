@@ -19,25 +19,27 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	// Setup Phone and Session callbacks.
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	var readycb   = function(session){};
+	var readycb   = function(){};
+	var unablecb  = function(){};
     var receivecb = function(session){};
-    var authcb    = function(){};
     var videotogglecb = function(session, isEnabled){};
     var audiotogglecb = function(session, isEnabled){};
     
     CONTROLLER.ready   = function(cb) { readycb   = cb };
-    CONTROLLER.auth    = function(cb) { authcb    = cb }
+    CONTROLLER.unable  = function(cb) { unablecb  = cb };
     CONTROLLER.receive = function(cb) { receivecb = cb };
     CONTROLLER.videoToggled = function(cb) { videotogglecb = cb };
     CONTROLLER.audioToggled = function(cb) { audiotogglecb = cb };
 	
 	phone.ready(function(){ readycb() });
+	phone.unable(function(){ unablecb() });
 	phone.receive(function(session){
 		manage_users(session);
 		receivecb(session);
 	});
 	
-	// Require some boolean form of authentication to accept a call
+	/* Require some boolean form of authentication to accept a call
+	var authcb    = function(){};
 	CONTROLLER.answerCall = function(session, auth, cb){
 		auth(acceptCall(session, cb), session);
 	}
@@ -47,7 +49,7 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 			if (accept) cb(session);
 			else phone.hangup(session.number); 
 		}
-	}
+	}*/
 	
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	// Setup broadcasting, your screen to all.

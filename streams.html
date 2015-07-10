@@ -52,13 +52,16 @@
 </form>
 
 <div id="inStream">
-	<button id="end" onclick="end()">Done</button>
+	<button id="end" onclick="end()">Done</button> <br>
+	Embed Style: <button onclick="genEmbed(400,600)">Tall</button><button onclick="genEmbed(600,400)">Wide</button><button onclick="genEmbed(500,500)">Square</button><br>
+	<div id="embed-code"></div>
+	<div id="embed-demo"></div>
 </div>
 <div id="logs"></div>
 
 <p><b>To Use:</b></p>
-<p>Type a username and click Log in. If input turns green you are ready to receive/place a call.</p>
-<p>In a separate browser window, log in with a different username, and place a call to the first.</p>
+<p>Type a channel to stream to and click Stream.</p>
+<p>In a separate browser window, join the steam you created.</p>
 
 <!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
 <!-- WebRTC Peer Connections -->
@@ -70,10 +73,13 @@
 
 <script type="text/javascript">
 
-var video_out = document.getElementById("vid-box");
+var video_out  = document.getElementById("vid-box");
+var embed_code = document.getElementById("embed-code");
+var embed_demo = document.getElementById("embed-demo");
+var streamName;
 
 function stream(form) {
-	var streamName = form.streamname.value || Math.floor(Math.random()*100)+'';
+	streamName = form.streamname.value || Math.floor(Math.random()*100)+'';
 	var phone = window.phone = PHONE({
 	    number        : streamName, // listen on username line else random
 	    publish_key   : 'pub-c-561a7378-fa06-4c50-a331-5c0056d0163c', // Your Pub Key
@@ -133,6 +139,18 @@ function getVideo(number){
 
 function addLog(log){
 	$('#logs').append("<p>"+log+"</p>");
+}
+
+function genEmbed(w,h){
+	if (!streamName) return;
+	var url = "http://kevingleason.me/SimpleRTC/embed.html?stream=" + streamName;
+	var embed    = document.createElement('iframe');
+	embed.src    = url;
+	embed.width  = w;
+	embed.height = h;
+	embed_demo.innerHTML = embed.outerHTML;
+	embed_code.innerHTML = '';
+	embed_code.appendChild(document.createTextNode(embed.outerHTML));
 }
 
 </script>

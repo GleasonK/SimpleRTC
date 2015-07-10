@@ -69,6 +69,7 @@ ctrl.receive(function(session){
 ctrl.streamPresence(function(m){
 	here_now.innerHTML = m.occupancy;
 });
+ctrl.unable(function(){ handleNoStream(); });
 
 // Get URL params
 function urlparams() {
@@ -82,7 +83,7 @@ function urlparams() {
 }
 
 function handleNoStream(){
-	vid_out.innerHTML="<h1>That stream no longer exists!</h1>";
+	video_out.innerHTML="<h1>That stream no longer exists!</h1>";
 	stream_info.hidden=true;
 }
 
