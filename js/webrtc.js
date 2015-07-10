@@ -16,7 +16,8 @@ var PHONE = window.PHONE = function(config) {
     var myconnection  = false;
     var mediaconf     = config.media || { audio : true, video : true };
     var conversations = {};
-    var oneway        = config.oneway || false;
+    var oneway        = config.oneway || false
+    var broadcast     = config.broadcast || false;
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // RTC Peer Connection Session (one per call)
@@ -190,8 +191,7 @@ var PHONE = window.PHONE = function(config) {
 
             // Add Local Media Streams Audio Video Mic Camera
             //  If answering and oneway streaming, do not attach stream
-            if (!isAnswer || !oneway) 
-            	talk.pc.addStream(mystream);   // Add null here on the receiving end of streaming to go one-way.
+            if (!isAnswer || !oneway) talk.pc.addStream(mystream);   // Add null here on the receiving end of streaming to go one-way.
 
             // Notify of Call Status
             update_conversation( talk, 'connecting' );
@@ -415,7 +415,7 @@ var PHONE = window.PHONE = function(config) {
     // Prepare Local Media Camera and Mic
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function getusermedia() { //Do something if not requesting any media?
-        if (oneway){
+        if (oneway && !broadcast){
 	        if (!PeerConnection){ return unablecb(); }
 	        onready();
 	        subscribe();

@@ -4,7 +4,6 @@
 var CONTROLLER = window.CONTROLLER = function(phone){
 	if (!window.phone) window.phone = phone;
 	var ctrlChan  = controlChannel(phone.number());
-	var isStream  = phone.oneway;
 	var pubnub    = phone.pubnub;
 	var userArray = [];
 	subscribe();
@@ -95,7 +94,7 @@ var CONTROLLER = window.CONTROLLER = function(phone){
     }
     
     CONTROLLER.send = function( message, number ) {
-        if (isStream) return stream_message(message);
+        if (phone.oneway) return stream_message(message);
         phone.send(message, number);
     };
     
@@ -174,7 +173,8 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 			if (idx != -1) userArray.splice(idx, 1)[0]; // User leaving
 		} else {  				// New User added to stream/group
 			if (idx == -1) {  	// Tell everyone in array of new user first, then add to array. 
-				if (!isStream) publishCtrlAll("userJoin", session.number);
+				alert(phone.oneway);
+				if (!phone.oneway) publishCtrlAll("userJoin", session.number);
 				userArray.push(session);
 			}
 		}
@@ -222,7 +222,7 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 			callAuth(m.data);
 			break;
 		case "userJoin":
-			if (isStream) add_to_stream(m.data); // JOIN STREAM HERE!
+			if (phone.oneway){ alert("HERE"); add_to_stream(m.data); }// JOIN STREAM HERE!
 			else add_to_group(m.data);
 			break;
 		case "userLeave":
