@@ -20,25 +20,24 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
 	// Setup Phone and Session callbacks.
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	var readycb   = function(session){};
-    var receivecb = function(session){};
-    var authcb    = function(){};
+    var messagecb = function(session){};
     var videotogglecb = function(session, isEnabled){};
     var audiotogglecb = function(session, isEnabled){};
     
     CONTROLLER.ready   = function(cb) { readycb   = cb };
-    CONTROLLER.auth    = function(cb) { authcb    = cb }
-    CONTROLLER.receive = function(cb) { receivecb = cb };
+    CONTROLLER.message = function(cb) { messagecb = cb };
     CONTROLLER.videoToggled = function(cb) { videotogglecb = cb };
     CONTROLLER.audioToggled = function(cb) { audiotogglecb = cb };
 	
 	phone.ready(function(){ readycb() });
 	phone.receive(function(session){
-		manage_users(session);
+		CONTROLLER.manageUsers(session);
 		receivecb(session);
 	});
+
 	
 	// Require some boolean form of authentication to accept a call
-	CONTROLLER.answerCall = function(session, auth, cb){
+	CONTROLLER.postAuth = function(session, auth, cb){
 		auth(acceptCall(session, cb), session);
 	}
 	
@@ -52,65 +51,22 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	// Setup broadcasting, your screen to all.
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	var streamreceivecb = function(m){}; 
-	var streamprescb    = function(m){};
-	var stream_name = "";
-	
-	
-	CONTROLLER.streamPresence = function(cb){ streamprescb    = cb; }
-	CONTROLLER.streamReceive  = function(cb){ streamreceivecb = cb; }
-	
-	function broadcast(vid){
+	CONTROLLER.broadcast = function(vid){
 	    var video = document.createElement('video');
-		
         video.src    = URL.createObjectURL(phone.mystream);
         video.volume = 0.0;
         video.play();
-	    //vid.innerHTML=""
-	    vid.setAttribute( 'data-number', phone.number() );
-	    vid.style.cssText ="-moz-transform: scale(-1, 1); \
-						 	-webkit-transform: scale(-1, 1); -o-transform: scale(-1, 1); \
-							transform: scale(-1, 1); filter: FlipH;";
-		vid.appendChild(video);
+	    vid.innerHTML=""
+	    vid.appendChild(video);
+	    vid.style.cssText = "-moz-transform: scale(-1, 1); \
+-webkit-transform: scale(-1, 1); -o-transform: scale(-1, 1); \
+transform: scale(-1, 1); filter: FlipH;";
+		
     };
-    
-    function stream_subscribe(name){
-	    var ch = (name ? name : phone.number()) + "-stream";
-	    pubnub.subscribe({
-            channel    : ch,
-            message    : streamreceivecb,
-            presence   : streamprescb,
-            connect    : function() { stream_name = ch; console.log("Streaming channel " + ch); }
-        });
-    }
-    
-    CONTROLLER.stream = function(){
-	    stream_subscribe();
-    }
-    
-    CONTROLLER.joinStream = function(name){
-	    stream_subscribe(name);
-	    publishCtrl(controlChannel(name), "userJoin", phone.number());
-    }
-    
-    CONTROLLER.send = function( message, number ) {
-        if (isStream) return stream_message(message);
-        phone.send(message, number);
-    };
-    
-    function stream_message(message){
-	    if (!stream_name) return; // Not in a stream
-		pubnub.publish({ 
-			channel: stream_name,
-			message: msg,
-			callback : function(m){console.log(m)}
-		});
-    }
-    
     
     // Give it a div and it will set up the thumbnail image
-    CONTROLLER.addLocalStream = function(streamHolder){
-	    broadcast(streamHolder);
+    CONTROLLER.registerThumbnailHolder = function(thumbnailHolder){
+	    CONTROLLER.broadcast(thumbnailHolder);
     };
 	
 	CONTROLLER.dial = function(number){ // Authenticate here??
@@ -119,11 +75,14 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
 	};
 	
 	CONTROLLER.hangup = function(number){
-		if (number) { 
+		if (number) {
+			
 			phone.hangup(number);
 			return publishCtrl(controlChannel(number), "userLeave", phone.number())
-		} 
+		}
+		
 		phone.hangup();
+		
 		for (var i=0; i < userArray.length; i++) {
 			var cChan = controlChannel(userArray[i].number);
 			publishCtrl(cChan, "userLeave", phone.number());
@@ -148,7 +107,7 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
 			videoTracks[i].enabled = !videoTracks[i].enabled;
 			video = videoTracks[i].enabled;
 		}
-		publishCtrlAll("userVideo", {user : phone.number(), video:video}); // Stream false if paused
+		phone.send({type: "ctrl-userVideo", data: {user : phone.number(), video:video}); // Stream false if paused
 		return video;
 	};
 	
@@ -162,18 +121,18 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
 		});
 	};
 	
-	CONTROLLER.isStreaming = function(number, cb){
-		CONTROLLER.isOnline(number+"-stream", cb);
-	};
-	
-	function manage_users(session){
+	CONTROLLER.manageUsers = function(session){
 		if (session.number == phone.number()) return; 	// Do nothing if it is self.
+		console.log(phone.number());
+		console.log(session.number);
 		var idx = findWithAttr(userArray, "number", session.number); // Find session by number
 		if (session.closed){
 			if (idx != -1) userArray.splice(idx, 1)[0]; // User leaving
 		} else {  				// New User added to stream/group
 			if (idx == -1) {  	// Tell everyone in array of new user first, then add to array. 
-				if (!isStream) publishCtrlAll("userJoin", session.number);
+				if (!isStream) { 
+					publishCtrlAll("userJoin", session.number);
+				}
 				userArray.push(session);
 			}
 		}
@@ -181,11 +140,7 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
 		console.log(userArray);
 	}
 	
-	function add_to_stream(number){
-		phone.dial(number);
-	}
-	
-	function add_to_group(number){
+	function addToGroupChat(number){
 		var session = phone.dial(number, get_xirsys_servers()); // Dial Number
 		if (!session) return; 	// No Dupelicate Dialing Allowed
 	}
@@ -215,33 +170,28 @@ var CONTROLLER = window.CONTROLLER = function(phone, stream){
         });
 	}
 	
-	function receive(m){
+	phone.message(function(m){
 		switch(m.type) {
-		case "userCall":
-			callAuth(m.data);
-			break;
-		case "userJoin":
-			alert(isStream);
-			if (isStream) add_to_stream(m.data); // JOIN STREAM HERE!
-			else add_to_group(m.data);
-			break;
-		case "userLeave":
+		case "ctrl-userJoin":
+			return addToGroupChat(m.data);
+		case "ctrl-userLeave":
 			var idx = findWithAttr(userArray, "number", m.data);
 			if (idx != -1) userArray.splice(idx, 1)[0];
-			break;
-		case "userVideo":
+			return;
+		case "ctrl-userVideo":
 			var idx = findWithAttr(userArray, "number", m.data.user);
 			var vidEnabled = m.data.video;
 			if (idx != -1) videotogglecb(userArray[idx], vidEnabled);
-			break;
-		case "userAudio":
+			return;
+		case "ctrl-userAudio":
 			var idx = findWithAttr(userArray, "number", m.data.user);
 			var audEnabled = m.data.audio;
 			if (idx != -1) audiotogglecb(userArray[idx], audEnabled);
-			break;
+			return;
 		}
 		console.log(m);
-	}
+		console.log(userArray);
+	})
 	
 	function findWithAttr(array, attr, value) {
 	    for(var i = 0; i < array.length; i += 1) {

@@ -16,6 +16,7 @@ var PHONE = window.PHONE = function(config) {
     var myconnection  = false;
     var mediaconf     = config.media || { audio : true, video : true };
     var conversations = {};
+    var streamWatch   = config.streamWatch || false;
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // RTC Peer Connection Session (one per call)
@@ -52,32 +53,40 @@ var PHONE = window.PHONE = function(config) {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // STUN Server List Configuration (public STUN list)
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    var rtcconfig = { iceServers : [{ "url" :
-        navigator.mozGetUserMedia    ? "stun:stun.services.mozilla.com" :
-        navigator.webkitGetUserMedia ? "stun:stun.l.google.com:19302"   :
-                                       "stun:23.21.150.121"
-    },
-        {url: "stun:stun.l.google.com:19302"},
-        {url: "stun:stun1.l.google.com:19302"},
-        {url: "stun:stun2.l.google.com:19302"},
-        {url: "stun:stun3.l.google.com:19302"},
-        {url: "stun:stun4.l.google.com:19302"},
-        {url: "stun:23.21.150.121"},
-        {url: "stun:stun01.sipphone.com"},
-        {url: "stun:stun.ekiga.net"},
-        {url: "stun:stun.fwdnet.net"},
-        {url: "stun:stun.ideasip.com"},
-        {url: "stun:stun.iptel.org"},
-        {url: "stun:stun.rixtelecom.se"},
-        {url: "stun:stun.schlund.de"},
-        {url: "stun:stunserver.org"},
-        {url: "stun:stun.softjoys.com"},
-        {url: "stun:stun.voiparound.com"},
-        {url: "stun:stun.voipbuster.com"},
-        {url: "stun:stun.voipstunt.com"},
-        {url: "stun:stun.voxgratia.org"},
-        {url: "stun:stun.xten.com"}
-    ] };
+    var rtcconfig = { 
+	    /*constraints: {
+			mandatory: {
+				OfferToReceiveAudio: true,
+				OfferToReceiveVideo: true
+			},
+			optional: []
+		},*/
+	    iceServers : [{ "url" :
+	        navigator.mozGetUserMedia    ? "stun:stun.services.mozilla.com" :
+	        navigator.webkitGetUserMedia ? "stun:stun.l.google.com:19302"   :
+	                                       "stun:23.21.150.121"
+	    	},
+	        {url: "stun:stun.l.google.com:19302"},
+	        {url: "stun:stun1.l.google.com:19302"},
+	        {url: "stun:stun2.l.google.com:19302"},
+	        {url: "stun:stun3.l.google.com:19302"},
+	        {url: "stun:stun4.l.google.com:19302"},
+	        {url: "stun:23.21.150.121"},
+	        {url: "stun:stun01.sipphone.com"},
+	        {url: "stun:stun.ekiga.net"},
+	        {url: "stun:stun.fwdnet.net"},
+	        {url: "stun:stun.ideasip.com"},
+	        {url: "stun:stun.iptel.org"},
+	        {url: "stun:stun.rixtelecom.se"},
+	        {url: "stun:stun.schlund.de"},
+	        {url: "stun:stunserver.org"},
+	        {url: "stun:stun.softjoys.com"},
+	        {url: "stun:stun.voiparound.com"},
+	        {url: "stun:stun.voipbuster.com"},
+	        {url: "stun:stun.voipstunt.com"},
+	        {url: "stun:stun.voxgratia.org"},
+	        {url: "stun:stun.xten.com"}] 
+	    };
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // Custom STUN Options
@@ -116,7 +125,7 @@ var PHONE = window.PHONE = function(config) {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // Add/Get Conversation - Creates a new PC or Returns Existing PC
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    function get_conversation(number) {
+    function get_conversation(number, isAnswer) {
         var talk = conversations[number] || (function(number){
             var talk = {
                 number  : number,
@@ -180,7 +189,8 @@ var PHONE = window.PHONE = function(config) {
             talk.message   = function(cb) {talk.usermsg = cb; return talk};
 
             // Add Local Media Streams Audio Video Mic Camera
-            talk.pc.addStream(mystream);
+            if (!isAnswer)
+	            talk.pc.addStream(mystream);   // Add null here on the receiving end of streaming to go one-way.
 
             // Notify of Call Status
             update_conversation( talk, 'connecting' );
@@ -393,7 +403,7 @@ var PHONE = window.PHONE = function(config) {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function onready(subscribed) {
         if (subscribed) myconnection = true;
-        if (!(mystream && myconnection)) return;
+        if (!((mystream || streamWatch) && myconnection)) return;
         
         connectcb();
         readycb();
@@ -402,7 +412,12 @@ var PHONE = window.PHONE = function(config) {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // Prepare Local Media Camera and Mic
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    function getusermedia() {
+    function getusermedia() { //Do something if not requesting any media?
+        if (streamWatch){
+	        onready();
+	        subscribe();
+            return;
+        }
         navigator.getUserMedia( mediaconf, function(stream) {
             if (!stream) return unablecb(stream);
             mystream = stream;
@@ -443,7 +458,8 @@ var PHONE = window.PHONE = function(config) {
         debugcb(message);
 
         // Get Call Reference
-        var talk = get_conversation(message.number);
+        var talk = get_conversation(message.number, true);
+        
         // Ignore if Closed
         if (talk.closed) return;
 
@@ -459,7 +475,7 @@ var PHONE = window.PHONE = function(config) {
         // If Hangup Request
         if (message.packet.hangup) return talk.hangup(false);
 
-        // If Peer Calling Inbound (Incoming)
+        // If Peer Calling Inbound (Incoming) - Can determine stream + receive here.
         if ( message.packet.sdp && !talk.received ) {
             talk.received = true;
             receivercb(talk);
@@ -488,7 +504,7 @@ var PHONE = window.PHONE = function(config) {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function add_sdp_offer(message) {
         // Get Call Reference
-        var talk = get_conversation(message.number);
+        var talk = get_conversation(message.number, message.packet.type=='answer');
         var pc   = talk.pc;
         var type = message.packet.type == 'offer' ? 'offer' : 'answer';
 

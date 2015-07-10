@@ -73,7 +73,7 @@ function login(form) {
 	ctrl.ready(function(){
 		form.username.style.background="#55ff5b"; 
 		form.login_submit.hidden="true"; 
-		ctrl.registerThumbnailHolder(vid_thumb);
+		ctrl.addLocalStream(vid_thumb);
 		addLog("Logged in as " + form.username.value); 
 	});
 	ctrl.receive(function(session){
