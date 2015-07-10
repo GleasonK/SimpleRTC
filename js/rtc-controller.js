@@ -1,10 +1,10 @@
 (function(){
 	
 	
-var CONTROLLER = window.CONTROLLER = function(phone, stream){
+var CONTROLLER = window.CONTROLLER = function(phone){
 	if (!window.phone) window.phone = phone;
 	var ctrlChan  = controlChannel(phone.number());
-	var isStream  = stream || false;
+	var isStream  = phone.oneway;
 	var pubnub    = phone.pubnub;
 	var userArray = [];
 	subscribe();

@@ -298,8 +298,9 @@ var PHONE = window.PHONE = function(config) {
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // Expose local stream and pubnub object
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    PHONE.mystream     = mystream;
-    PHONE.pubnub       = pubnub;
+    PHONE.mystream = mystream;
+    PHONE.pubnub   = pubnub;
+    PHONE.oneway   = oneway;
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // Auto-hangup on Leave

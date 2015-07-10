@@ -1,0 +1,91 @@
+<html>
+<head>
+	<style>
+		#vid-box{
+			width: 100%;
+			height: 100%;
+		}
+		
+		#vid-box video{
+			width: 100%;
+			height: 100%;
+		}
+		
+		#stream-info{
+			position: absolute;
+			bottom: 3vh;
+			right: 5vw;
+		}
+		
+		#stream-info img, #stream-info span {
+			height: 30px;
+			font-size: 30px;
+			font-family: sans-serif;
+			color: #777;
+		}
+	</style>
+</head>
+<body>
+	<div id="vid-box"></div>
+	<div id="stream-info" ><img src="img/person_dark.png"/><span id="here-now">0</span></div>
+</body>
+
+<script src="https://cdn.pubnub.com/pubnub.min.js"></script>
+<script src="js/webrtc.js"></script>
+<script src="js/rtc-controller.js"></script>
+<script>
+	
+(function(){
+
+var urlargs     = urlparams();
+var video_out   = document.getElementById("vid-box");
+var stream_info = document.getElementById("stream-info");
+var here_now    = document.getElementById("here-now"); 
+
+// Handle error if stream is not in urlargs.
+if (!('stream' in urlargs)) {
+	handleNoStream();
+    return;
+}
+var stream = urlargs.stream;
+
+var phone = window.phone = PHONE({
+    number        : "EmbedViewer" + Math.floor(Math.random()*100), // listen on username line else random
+    publish_key   : 'pub-c-561a7378-fa06-4c50-a331-5c0056d0163c', // Your Pub Key
+    subscribe_key : 'sub-c-17b7db8a-3915-11e4-9868-02ee2ddab7fe', // Your Sub Key
+    oneway        : true,
+});
+var ctrl = window.ctrl = CONTROLLER(phone);
+ctrl.ready(function(){
+	ctrl.isStreaming(stream, function(isOn){
+		if (isOn) ctrl.joinStream(stream);
+		else handleNoStream();
+	}); 
+});
+ctrl.receive(function(session){
+    session.connected(function(session){ stream_info.hidden=false; video_out.appendChild(session.video); });
+    session.ended(function(session){ handleNoStream(); });
+});
+ctrl.streamPresence(function(m){
+	here_now.innerHTML = m.occupancy;
+});
+
+// Get URL params
+function urlparams() {
+    var params = {};
+    if (location.href.indexOf('?') < 0) return params;
+    PUBNUB.each(
+        location.href.split('?')[1].split('&'),
+        function(data) { var d = data.split('='); params[d[0]] = d[1]; }
+    );
+    return params;
+}
+
+function handleNoStream(){
+	vid_out.innerHTML="<h1>That stream no longer exists!</h1>";
+	stream_info.hidden=true;
+}
+
+}());
+
+</script>

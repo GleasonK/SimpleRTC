@@ -80,7 +80,7 @@ function stream(form) {
 	    subscribe_key : 'sub-c-17b7db8a-3915-11e4-9868-02ee2ddab7fe', // Your Sub Key
 	});
 	phone.debug(function(m){ console.log(m); })
-	var ctrl = window.ctrl = CONTROLLER(phone, true);
+	var ctrl = window.ctrl = CONTROLLER(phone);
 	ctrl.ready(function(){
 		form.streamname.style.background="#55ff5b";
 		form.streamname.value = phone.number(); 
