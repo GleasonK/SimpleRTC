@@ -19,6 +19,10 @@
 		    display: block;
 		    margin: 0 auto;
 	    }
+	    
+	    input[type="submit"]{
+		    width:50px;
+	    }
     </style>
     
 </head>
@@ -27,24 +31,24 @@
 <!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
 <!-- My Phone Number & Dial Areas -->
 <!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
-<div id="vid-box"></div>
-<div id="vid-thumb"></div>
-
-<form name="loginForm" id="login" action="#" onsubmit="return login(this);">
-    <input type="text" name="username" id="username" placeholder="Pick a username!" />
-    <input type="submit" name="login_submit" value="Log In">
-</form>
-
-
-<form name="callForm" id="call" action="#" onsubmit="return makeCall(this);">
-	<input type="text" name="number" placeholder="Enter user to dial!" />
-	<input type="submit" value="Call"/>
-</form>
-
-<div id="inCall">
-	<button id="end" onclick="end()">End</button> <button id="mute" onclick="mute()">Mute</button> <button id="pause" onclick="pause()">Pause</button>
-</div>
-<div id="logs"></div>
+	<div id="vid-box"></div>
+	<div id="vid-thumb"></div>
+	
+	<form name="loginForm" id="login" action="#" onsubmit="return login(this);">
+	    <input type="text" name="username" id="username" placeholder="Pick a username!" />
+	    <input type="submit" name="login_submit" value="Log In">
+	</form>
+	
+	
+	<form name="callForm" id="call" action="#" onsubmit="return makeCall(this);">
+		<input type="text" name="number" placeholder="Enter user to dial!" />
+		<input type="submit" value="Call"/>
+	</form>
+	
+	<div id="inCall">
+		<button id="end" onclick="end()">End</button> <button id="mute" onclick="mute()">Mute</button> <button id="pause" onclick="pause()">Pause</button>
+	</div>
+	<div id="logs"></div>
 
 <p><b>To Use:</b></p>
 <p>Type a username and click Log in. If input turns green you are ready to receive/place a call.</p>
@@ -78,13 +82,14 @@ function login(form) {
 	});
 	ctrl.receive(function(session){
 	    session.connected(function(session){ video_out.appendChild(session.video); addLog(session.number + " has joined."); });
-	    session.ended(function(session) { getVideo(session.number).remove(); addLog(session.number + " has left."); });
+	    session.ended(function(session) { ctrl.getVideoElement(session.number).remove(); addLog(session.number + " has left."); });
 	});
 	ctrl.videoToggled(function(session, isEnabled){
-		getVideo(session.number).toggle(isEnabled);
+		ctrl.getVideoElement(session.number).toggle(isEnabled);
 		addLog(session.number+": video enabled - " + isEnabled);
 	});
 	ctrl.audioToggled(function(session, isEnabled){
+		ctrl.getVideoElement(session.number).css("opacity",isEnabled ? 1 : 0.75);
 		addLog(session.number+": audio enabled - " + isEnabled);
 	});
 	return false;
@@ -103,8 +108,8 @@ function makeCall(form){
 
 function mute(){
 	var audio = ctrl.toggleAudio();
-	if (!audio){ $("#mute").html("Unmute"); }
-	else { $("#mute").html("Mute"); }
+	if (!audio) $("#mute").html("Unmute");
+	else $("#mute").html("Mute");
 }
 
 function end(){
@@ -113,8 +118,8 @@ function end(){
 
 function pause(){
 	var video = ctrl.toggleVideo();
-	if (!video){ $('#pause').html('Unpause'); }
-	else { $('#pause').html('Pause'); }
+	if (!video) $('#pause').html('Unpause'); 
+	else $('#pause').html('Pause'); 
 }
 
 function getVideo(number){

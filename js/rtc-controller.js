@@ -1,3 +1,13 @@
+/* WebRTC PubNub Controller
+ * Author: Kevin Gleason
+ * Date: July 15, 2015
+ * Description: A wrapper library for the PubNub WebRTC SDK to make simple video
+ *              functions a breeze to implement.
+ *
+ * TODO: make getVideoElement a native non-jQuery function
+ *
+ */
+
 (function(){
 	
 	
@@ -93,6 +103,13 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 	    publishCtrl(controlChannel(name), "userJoin", phone.number());
     }
     
+    CONTROLLER.leaveStream = function(name){
+	    var ch = (name ? name : phone.number()) + "-stream";
+	    pubnub.unsubscribe({
+            channel    : ch,
+        });
+    }
+    
     CONTROLLER.send = function( message, number ) {
         if (phone.oneway) return stream_message(message);
         phone.send(message, number);
@@ -119,10 +136,12 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 	};
 	
 	CONTROLLER.hangup = function(number){
-		if (number) { 
+		if (number) {
+			if (phone.oneway) CONTROLLER.leaveStream(number);
 			phone.hangup(number);
 			return publishCtrl(controlChannel(number), "userLeave", phone.number())
 		} 
+		if (phone.oneway) CONTROLLER.leaveStream();
 		phone.hangup();
 		for (var i=0; i < userArray.length; i++) {
 			var cChan = controlChannel(userArray[i].number);
@@ -166,6 +185,10 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 		CONTROLLER.isOnline(number+"-stream", cb);
 	};
 	
+	CONTROLLER.getVideoElement = function(number){
+		return $('*[data-number="'+number+'"]');
+	}
+	
 	function manage_users(session){
 		if (session.number == phone.number()) return; 	// Do nothing if it is self.
 		var idx = findWithAttr(userArray, "number", session.number); // Find session by number
@@ -178,7 +201,7 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 			}
 		}
 		userArray = userArray.filter(function(s){ return !s.closed; }); // Clean to only open talks
-		console.log(userArray);
+		// console.log(userArray);
 	}
 	
 	function add_to_stream(number){
@@ -198,7 +221,7 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 	}
 	
 	function publishCtrl(ch, type, data){
-		console.log("Pub to " + ch);
+		// console.log("Pub to " + ch);
 		var msg = {type: type, data: data};
 		pubnub.publish({ 
 			channel: ch,
@@ -211,7 +234,7 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 		pubnub.subscribe({
             channel    : ctrlChan,
             message    : receive,
-            connect    : function() { console.log("Subscribed to " + ctrlChan); }
+            connect    : function() {} // console.log("Subscribed to " + ctrlChan); }
         });
 	}
 	
@@ -239,7 +262,7 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 			if (idx != -1) audiotogglecb(userArray[idx], audEnabled);
 			break;
 		}
-		console.log(m);
+		// console.log(m);
 	}
 	
 	function findWithAttr(array, attr, value) {
@@ -257,7 +280,7 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 })();
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-// Request fresh TURN servers from XirSys
+// Request fresh TURN servers from XirSys - Need to explain.
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 function get_xirsys_servers() {
     var servers;
