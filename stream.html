@@ -91,8 +91,8 @@ function stream(form) {
 		form.streamname.style.background="#55ff5b";
 		form.streamname.value = phone.number(); 
 		form.stream_submit.hidden="true"; 
-		ctrl.stream();
 		ctrl.addLocalStream(video_out);
+		ctrl.stream();
 		addLog("Streaming to " + streamName); 
 	});
 	ctrl.receive(function(session){
