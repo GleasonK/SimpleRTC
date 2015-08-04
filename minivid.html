@@ -65,6 +65,7 @@
 
         
 	</form>
+    <button class="cbutton cbutton--effect-radomir md-trigger" value="Call" hidden="true" data-modal="modal-13" id="showModal"></button>
 	<div class="ptext">
         <p>To Use:</p>
         <p>Enter a username and click Log in button. If input turns green you are ready to receive/place a call.</p>
@@ -90,16 +91,20 @@ function login(form) {
 	});	
 	phone.ready(function(){form.username.style.background="#55ff5b"; form.login_submit.hidden="true"; });
 	phone.receive(function(session){
-	    session.connected(function(session) { video_out.appendChild(session.video); });
+	    session.connected(function(session) { video_out.appendChild(session.video); showModal();});
 	    session.ended(function(session) { video_out.innerHTML=''; });
 	});
 	return false;
 }
-
+    
 function makeCall(form){
 	if (!window.phone) alert("Login First!");
 	else phone.dial(form.number.value);
 	return false;
+}
+    
+function showModal(){
+    $("#showModal").click();
 }
 
 </script>
