@@ -4,31 +4,75 @@
     <title>PubRTC + Mobile</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-	    #vid-box video{
-		    width: 400px;
-	    }
-    </style>
+
+    
+    <link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
+    <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.3.0/css/font-awesome.min.css" />
+    <script src="js/modernizr.custom.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css" />
+
+
     
 </head>
 <body>
+<div class = "bodyDiv">
+    
+    <div class="md-modal md-effect-13" id="modal-13">
+			<div class="md-content">
+				<div>
+	                 <div id="vid-box"></div>
+                    <button class="md-close">
+                       <i class="md-close fa fa-times-circle-o"></i>
+                    </button>
+                    
+				</div>
+			</div>
+    </div>
+    
+    
+        <form name="loginForm" id="login" action="#" onsubmit="return login(this);">
+            <span class="input input--nao">
+                <input class="input__field input__field--nao" type="text" name="username" id="username" placeholder="Enter A Username"/>
+                        <label class="input__label input__label--nao" for="username">
+                            <span class="input__label-content input__label-content--nao">                                          
+                            </span>
+                        </label>
+                    <svg class="graphic graphic--nao" width="300%" height="100%" viewBox="0 0 1200 60" preserveAspectRatio="none">
+                        <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0"/>
+                    </svg>
+            </span>
+            
+               <button class="cbutton cbutton--effect-radomir" type="submit" name="login_submit" value="Log In" style="margin-top: 40px; margin-left:-10px">
+						<i class="cbutton__icon fa fa-fw fa fa-sign-in"></i>
+				</button>
+        </form>
 
-	<div id="vid-box"></div>
-	
-	<form name="loginForm" id="login" action="#" onsubmit="return login(this);">
-	    <input type="text" name="username" id="username" placeholder="Pick a username!" />
-	    <input type="submit" name="login_submit" value="Log In">
-	</form>
-	
 	<form name="callForm" id="call" action="#" onsubmit="return makeCall(this);">
-		<input type="text" name="number" placeholder="Enter user to dial!" />
-		<input type="submit" value="Call"/>
-	</form>
-	
-	<p><b>To Use:</b></p>
-	<p>Type a username and click Log in. If input turns green you are ready to receive/place a call.</p>
-	<p>In a separate browser window, log in with a different username, and place a call to the first.</p>
+        <span class="input input--nao">
+            <input class="input__field input__field--nao" type="text" name="number" id="call" placeholder="Enter User To Call!"/>
+					<label class="input__label input__label--nao" for="number">
+						<span class="input__label-content input__label-content--nao">                                          
+                        </span>
+					</label>
+				<svg class="graphic graphic--nao" width="300%" height="100%" viewBox="0 0 1200 60" preserveAspectRatio="none">
+				    <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0"/>
+				</svg>
+        </span>
+        
+        <button class="cbutton cbutton--effect-radomir md-trigger" type="submit" value="Call" style="margin-top: 40px; margin-left:-10px" data-modal="modal-13">
+            <i class="cbutton__icon fa fa-fw fa fa fa-phone-square"></i>
+        </button>
 
+        
+	</form>
+	<div class="ptext">
+        <p>To Use:</p>
+        <p>Enter a username and click Log in button. If input turns green you are ready to receive/place a call.</p>
+        <p>In a separate browser window, log in with a different username, and place a call to the first.</p>
+    </div>
+
+     
+</div>
 </body>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -59,4 +103,8 @@ function makeCall(form){
 }
 
 </script>
+<script src="js/modalEffects.js"></script>
+<script src="js/classie.js"></script>
+
+
 </html>

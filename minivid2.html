@@ -4,55 +4,80 @@
     <title>PubRTC + Mobile</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-	    #vid-box, #vid-thumb {
-		    text-align: center;
-	    }
-	    
-	    #vid-box video {
-		    margin 0 auto;
-		    width: 300px;
-	    }
-
-	    #vid-thumb, #vid-thumb video{
-		    width: 200px;
-		    display: block;
-		    margin: 0 auto;
-	    }
-	    
-	    input[type="submit"]{
-		    width:50px;
-	    }
-    </style>
+    
+    <link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
+    <link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.3.0/css/font-awesome.min.css" />
+    <script src="js/modernizr.custom.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css" />
     
 </head>
 <body>
+<div class = "bodyDiv">
 
 <!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
 <!-- My Phone Number & Dial Areas -->
 <!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= -->
-	<div id="vid-box"></div>
+	<div id="vid-box" class="video2"></div>
 	<div id="vid-thumb"></div>
 	
+<!--
 	<form name="loginForm" id="login" action="#" onsubmit="return login(this);">
 	    <input type="text" name="username" id="username" placeholder="Pick a username!" />
 	    <input type="submit" name="login_submit" value="Log In">
 	</form>
+-->
+    <form name="loginForm" id="login" action="#" onsubmit="return login(this);">
+        <span class="input input--nao">
+            <input class="input__field input__field--nao" type="text" name="username" id="username" placeholder="Enter A Username"/>
+                <label class="input__label input__label--nao" for="username">
+                    <span class="input__label-content input__label-content--nao">                                          
+                    </span>
+                </label>
+                <svg class="graphic graphic--nao" width="300%" height="100%" viewBox="0 0 1200 60" preserveAspectRatio="none">
+                    <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0"/>
+                </svg>
+        </span>
+            
+        <button class="cbutton cbutton--effect-radomir" type="submit" name="login_submit" value="Log In" style="margin-top: 40px; margin-left:-10px">
+            <i class="cbutton__icon fa fa-fw fa fa-sign-in"></i>
+        </button>
+    </form>
 	
-	
+<!--
 	<form name="callForm" id="call" action="#" onsubmit="return makeCall(this);">
 		<input type="text" name="number" placeholder="Enter user to dial!" />
 		<input type="submit" value="Call"/>
 	</form>
+-->
+    
+    
+    <form name="callForm" id="call" action="#" onsubmit="return makeCall(this);">
+        <span class="input input--nao">
+            <input class="input__field input__field--nao" type="text" name="number" id="call" placeholder="Enter User To Call!"/>
+					<label class="input__label input__label--nao" for="number">
+						<span class="input__label-content input__label-content--nao">                                          
+                        </span>
+					</label>
+				<svg class="graphic graphic--nao" width="300%" height="100%" viewBox="0 0 1200 60" preserveAspectRatio="none">
+				    <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0"/>
+				</svg>
+        </span>
+        <button class="cbutton cbutton--effect-radomir md-trigger" type="submit" value="Call" style="margin-top: 40px; margin-left:-10px" data-modal="modal-13">
+            <i class="cbutton__icon fa fa-fw fa fa fa-phone-square"></i>
+        </button>
+	</form>
 	
-	<div id="inCall">
-		<button id="end" onclick="end()">End</button> <button id="mute" onclick="mute()">Mute</button> <button id="pause" onclick="pause()">Pause</button>
+	<div id="inCall" class="ptext">
+		<button id="end" onclick="end()" >End</button> 
+        <button id="mute" onclick="mute()">Mute</button> 
+        <button id="pause" onclick="pause()">Pause</button>
 	</div>
-	<div id="logs"></div>
+    
+	<div id="logs" class="ptext"></div>
 
-<p><b>To Use:</b></p>
-<p>Type a username and click Log in. If input turns green you are ready to receive/place a call.</p>
-<p>In a separate browser window, log in with a different username, and place a call to the first.</p>
+<p class="ptext"><b>To Use:</b></p>
+<p class="ptext">Type a username and click Log in. If input turns green you are ready to receive/place a call.</p>
+<p class="ptext">In a separate browser window, log in with a different username, and place a call to the first.</p>
 
 <!-- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- -->
 <!-- WebRTC Peer Connections -->
@@ -66,7 +91,8 @@
 
 var video_out = document.getElementById("vid-box");
 var vid_thumb = document.getElementById("vid-thumb");
-
+var vidCount  = 0;
+    
 function login(form) {
 	var phone = window.phone = PHONE({
 	    number        : form.username.value || "Anonymous", // listen on username line else Anonymous
@@ -81,8 +107,8 @@ function login(form) {
 		addLog("Logged in as " + form.username.value); 
 	});
 	ctrl.receive(function(session){
-	    session.connected(function(session){ video_out.appendChild(session.video); addLog(session.number + " has joined."); });
-	    session.ended(function(session) { ctrl.getVideoElement(session.number).remove(); addLog(session.number + " has left."); });
+	    session.connected(function(session){ video_out.appendChild(session.video); addLog(session.number + " has joined."); vidCount++; });
+	    session.ended(function(session) { ctrl.getVideoElement(session.number).remove(); addLog(session.number + " has left.");    vidCount--;});
 	});
 	ctrl.videoToggled(function(session, isEnabled){
 		ctrl.getVideoElement(session.number).toggle(isEnabled);
@@ -131,5 +157,6 @@ function addLog(log){
 }
 
 </script>
+</div>
 </body>
 </html>
