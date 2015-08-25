@@ -29,7 +29,7 @@
 </div> 
 
     
-<form name="streamForm" id="stream" action="#" onsubmit="return stream(this);">
+<form name="streamForm" id="stream" action="#" onsubmit="return errWrap(stream,this);">
     <span class="input input--nao">
         <input class="input__field input__field--nao" type="text" name="streamname" placeholder="Enter Stream Name" id="streamname"/>
                 <label class="input__label input__label--nao" for="streamname">
@@ -47,7 +47,7 @@
 </form>
     
 
-<form name="watchForm" id="watch" action="#" onsubmit="return watch(this);">
+<form name="watchForm" id="watch" action="#" onsubmit="return errWrap(watch,this);">
     <span class="input input--nao">
         <input class="input__field input__field--nao" type="text" name="number" placeholder="Enter Stream To Watch!"/>
                 <label class="input__label input__label--nao" for="number">
@@ -185,6 +185,15 @@ function genEmbed(w,h){
 	embed_demo.innerHTML = "<a href='embed_demo.html?stream="+streamName+"&width="+w+"&height="+h+"'>Embed Demo</a>" 
 	embed_code.innerHTML = 'Embed Code: ';
 	embed_code.appendChild(document.createTextNode(embed.outerHTML));
+}
+
+function errWrap(fxn, form){
+	try {
+		return fxn(form);
+	} catch(err) {
+		alert("WebRTC is currently only supported by Chrome, Opera, and Firefox");
+		return false;
+	}
 }
 
 </script>
