@@ -30,7 +30,7 @@
     </div>
     
     
-        <form name="loginForm" id="login" action="#" onsubmit="return login(this);">
+        <form name="loginForm" id="login" action="#" onsubmit="return errWrap(login,this);">
             <span class="input input--nao">
                 <input class="input__field input__field--nao" type="text" name="username" id="username" placeholder="Enter A Username"/>
                         <label class="input__label input__label--nao" for="username">
@@ -47,7 +47,7 @@
 				</button>
         </form>
 
-	<form name="callForm" id="call" action="#" onsubmit="return makeCall(this);">
+	<form name="callForm" id="call" action="#" onsubmit="return errWrap(makeCall,this);">
         <span class="input input--nao">
             <input class="input__field input__field--nao" type="text" name="number" id="call" placeholder="Enter User To Call!"/>
 					<label class="input__label input__label--nao" for="number">
@@ -105,6 +105,15 @@ function makeCall(form){
     
 function showModal(){
     $("#showModal").click();
+}
+
+function errWrap(fxn, form){
+	try {
+		return fxn(form);
+	} catch(err) {
+		alert("WebRTC is currently only supported by Chrome, Opera, and Firefox");
+		return false;
+	}
 }
 
 </script>

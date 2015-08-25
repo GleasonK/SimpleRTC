@@ -130,8 +130,8 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 	    broadcast(streamHolder);
     };
 	
-	CONTROLLER.dial = function(number){ // Authenticate here??
-		var session = phone.dial(number, get_xirsys_servers()); // Dial Number
+	CONTROLLER.dial = function(number, servers){ // Authenticate here??
+		var session = phone.dial(number, servers); // Dial Number
 		if (!session) return; // No Duplicate Dialing Allowed
 	};
 	
@@ -281,20 +281,23 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // Request fresh TURN servers from XirSys - Need to explain.
+// room=default&application=default&domain=kevingleason.me&ident=gleasonk&secret=b9066b5e-1f75-11e5-866a-c400956a1e19
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 function get_xirsys_servers() {
     var servers;
     $.ajax({
         type: 'POST',
-        url: 'https://api.xirsys.com/getIceServers',
+        url: 'https://service.xirsys.com/ice',
         data: {
             room: 'default',
             application: 'default',
-            domain: 'www.pubnub-example.com',
-            ident: 'pubnub',
-            secret: 'dec77661-9b0e-4b19-90d7-3bc3877e64ce',
+            domain: 'kevingleason.me',
+            ident: 'gleasonk',
+            secret: 'b9066b5e-1f75-11e5-866a-c400956a1e19',
+            secure: 1,
         },
         success: function(res) {
+	        console.log(res);
             res = JSON.parse(res);
             if (!res.e) servers = res.d.iceServers;
         },
