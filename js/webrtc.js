@@ -112,6 +112,7 @@ var PHONE = window.PHONE = function(config) {
     var reconnectcb  = function(){};
     var callstatuscb = function(){};
     var receivercb   = function(){};
+    var datachannelcb= function(){};
 
     PHONE.message    = function(cb) { messagecb    = cb };
     PHONE.ready      = function(cb) { readycb      = cb };
@@ -122,6 +123,7 @@ var PHONE = window.PHONE = function(config) {
     PHONE.disconnect = function(cb) { disconnectcb = cb };
     PHONE.reconnect  = function(cb) { reconnectcb  = cb };
     PHONE.receive    = function(cb) { receivercb   = cb };
+    PHONE.datachannel= function(cb) { datachannelcb= cb };
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // Add/Get Conversation - Creates a new PC or Returns Existing PC
@@ -147,6 +149,20 @@ var PHONE = window.PHONE = function(config) {
             talk.pc.onaddstream    = config.onaddstream || onaddstream;
             talk.pc.onicecandidate = onicecandidate;
             talk.pc.number         = number;
+            
+            // Setup Data Channel
+            if (config.datachannels) {
+	            if (isAnswer){
+		            talk.pc.ondatachannel = function (event) {
+			            talk.datachannel = event.channel;
+			            setChannelEvents(talk.datachannel);
+			        };
+	            } else {
+		            var dataChannelOptions = { ordered: true, maxRetransmits: 2};
+					talk.datachannel = talk.pc.createDataChannel(number+"-dc", dataChannelOptions);
+					setChannelEvents(talk.datachannel);
+	            }
+	        }
 
             // Disconnect and Hangup
             talk.hangup = function(signal) {
@@ -167,6 +183,12 @@ var PHONE = window.PHONE = function(config) {
             talk.send = function(message) {
                 transmit( number, { usermsg : message } );
             };
+            
+            talk.sendData = function(message){
+	            if (!talk.datachannel) return console.log("Need to configure datachannel in settings.");
+				if (typeof(message)==='object') return talk.datachannel.send(JSON.stringify(message));
+	            talk.datachannel.send(message);
+            }
 
             // Sending Stanpshots
             talk.snap = function() {
@@ -285,6 +307,13 @@ var PHONE = window.PHONE = function(config) {
             talk.send(message);
         } );
     };
+    
+     PHONE.sendData = function( message, number ) {
+        if (number) return get_conversation(number).sendData(message);
+        PUBNUB.each( conversations, function( number, talk ) {
+            talk.sendData(message);
+        } );
+    };
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // End Call - Close All Calls or a Specific Call
@@ -376,6 +405,24 @@ var PHONE = window.PHONE = function(config) {
         talk.video = vid;
         talk.connect(talk);
     }
+    
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Data Channel Configurations
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	function setChannelEvents(datachannel){
+		datachannel.onmessage = function(m){
+			try { 
+				var msg = JSON.parse(m.data); 
+				datachannelcb(msg);
+			} catch (e) { 
+				datachannelcb(m.data);
+			}
+		};
+		datachannel.onopen    = function() {debugcb("------ DATACHANNEL OPENED ------")};
+		datachannel.onclose   = function() {debugcb("------ DATACHANNEL CLOSED ------")};
+		datachannel.onerror   = function() {debugcb("------ DATACHANNEL ERROR! ------")};
+	}
+    function ondatachannel(e){ console.log("Pass ondataconfig function in phone configurations object."); }
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // On ICE Route Candidate Discovery
@@ -564,6 +611,4 @@ var PHONE = window.PHONE = function(config) {
 
     return PHONE;
 };
-
-
 })();
