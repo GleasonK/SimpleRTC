@@ -1,5 +1,10 @@
 <html>
 <head>
+	<script type="text/javascript">
+	    var host = "kevingleason.me";
+	    if ((host == window.location.host) && (window.location.protocol != "https:"))
+	        window.location.protocol = "https";
+	</script>
 	<style>
 		#vid-box{
 			width: 100%;
@@ -32,8 +37,8 @@
 </body>
 
 <script src="https://cdn.pubnub.com/pubnub-3.7.14.min.js"></script>
-<script src="http://cdn.pubnub.com/webrtc/webrtc.js"></script>
-<script src="http://cdn.pubnub.com/webrtc/rtc-controller.js"></script>
+<script src="js/webrtc.js"></script>
+<script src="https://cdn.pubnub.com/webrtc/rtc-controller.js"></script>
 <script>	
 	
 (function(){
@@ -55,7 +60,6 @@ var phone = window.phone = PHONE({
     publish_key   : 'pub-c-561a7378-fa06-4c50-a331-5c0056d0163c', // Your Pub Key
     subscribe_key : 'sub-c-17b7db8a-3915-11e4-9868-02ee2ddab7fe', // Your Sub Key
     oneway        : true,
-    ssl : true,
 });
 var ctrl = window.ctrl = CONTROLLER(phone);
 ctrl.ready(function(){
