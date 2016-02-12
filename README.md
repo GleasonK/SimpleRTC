@@ -142,8 +142,8 @@ function get_xirsys_servers() {
         data: {
             room: 'default',
             application: 'default',
-            domain: '',
-            ident: '',
+            domain: 'your-domain',
+            ident: 'your-ident',
             secret: 'Your API key, on dashboard',
             secure: 1,
         },
@@ -160,7 +160,7 @@ function get_xirsys_servers() {
 
 This will return the servers you can use to start a video chat with production quality dependency. The PubNub phone.dial and controller.dial have an optional argument of servers to use to place a call, so to use your servers, simply call it as follows: 
 
-```js
+```
 phone.dial(number, get_xirsys_servers());
 ```
 

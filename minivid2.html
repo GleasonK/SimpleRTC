@@ -164,7 +164,28 @@ function addLog(log){
 	$('#logs').append("<p>"+log+"</p>");
 }
 
-
+function get_xirsys_servers() {
+    var servers;
+    $.ajax({
+        type: 'POST',
+        url: 'https://service.xirsys.com/ice',
+        data: {
+            room: 'default',
+            application: 'default',
+            domain: 'kevingleason.me',
+            ident: 'gleasonk',
+            secret: 'b9066b5e-1f75-11e5-866a-c400956a1e19',
+            secure: 1,
+        },
+        success: function(res) {
+	        console.log(res);
+            res = JSON.parse(res);
+            if (!res.e) servers = res.d.iceServers;
+        },
+        async: false
+    });
+    return servers;
+}
 
 function errWrap(fxn, form){
 	try {
