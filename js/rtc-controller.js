@@ -11,7 +11,7 @@
 (function(){
 	
 	
-var CONTROLLER = window.CONTROLLER = function(phone){
+var CONTROLLER = window.CONTROLLER = function(phone, serverFunc){
 	if (!window.phone) window.phone = phone;
 	var ctrlChan  = controlChannel(phone.number());
 	var pubnub    = phone.pubnub;
@@ -205,11 +205,12 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 	}
 	
 	function add_to_stream(number){
-		phone.dial(number);
+		if (serverFunc) phone.dial(number, serverFunc());
+		else phone.dial(number);
 	}
 	
 	function add_to_group(number){
-		var session = phone.dial(number, get_xirsys_servers()); // Dial Number
+		var session = serverFunc ? phone.dial(number, serverFunc()) : phone.dial(number); // Dial Number
 		if (!session) return; 	// No Dupelicate Dialing Allowed
 	}
 	
@@ -278,30 +279,3 @@ var CONTROLLER = window.CONTROLLER = function(phone){
 }
 
 })();
-
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-// Request fresh TURN servers from XirSys - Need to explain.
-// room=default&application=default&domain=kevingleason.me&ident=gleasonk&secret=b9066b5e-1f75-11e5-866a-c400956a1e19
-// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-function get_xirsys_servers() {
-    var servers;
-    $.ajax({
-        type: 'POST',
-        url: 'https://service.xirsys.com/ice',
-        data: {
-            room: 'default',
-            application: 'default',
-            domain: 'kevingleason.me',
-            ident: 'gleasonk',
-            secret: 'b9066b5e-1f75-11e5-866a-c400956a1e19',
-            secure: 1,
-        },
-        success: function(res) {
-	        console.log(res);
-            res = JSON.parse(res);
-            if (!res.e) servers = res.d.iceServers;
-        },
-        async: false
-    });
-    return servers;
-}

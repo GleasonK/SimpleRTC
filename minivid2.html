@@ -107,7 +107,7 @@ function login(form) {
 	    publish_key   : 'pub-c-561a7378-fa06-4c50-a331-5c0056d0163c', // Your Pub Key
 	    subscribe_key : 'sub-c-17b7db8a-3915-11e4-9868-02ee2ddab7fe', // Your Sub Key
 	});
-	var ctrl = window.ctrl = CONTROLLER(phone);
+	var ctrl = window.ctrl = CONTROLLER(phone, get_xirsys_servers);
 	ctrl.ready(function(){
 		form.username.style.background="#55ff5b"; 
 		form.login_submit.hidden="true"; 
@@ -163,6 +163,8 @@ function getVideo(number){
 function addLog(log){
 	$('#logs').append("<p>"+log+"</p>");
 }
+
+
 
 function errWrap(fxn, form){
 	try {
