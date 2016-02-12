@@ -131,6 +131,7 @@ var CONTROLLER = window.CONTROLLER = function(phone, serverFunc){
     };
 	
 	CONTROLLER.dial = function(number, servers){ // Authenticate here??
+		if (!servers && serverFunc) servers=serverFunc();
 		var session = phone.dial(number, servers); // Dial Number
 		if (!session) return; // No Duplicate Dialing Allowed
 	};
