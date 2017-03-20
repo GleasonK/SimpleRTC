@@ -74,7 +74,10 @@ This should leave you with an elaborate, well styled HTML file that looks someth
 There are three libraries that you will need to include to make WebRTC operations much easier. The first thing you should include is [jQuery](https://jquery.com/) to make modifying DOM elements a breeze. Then, you will need the PubNub JavaScript SDK to facilitate the WebRTC signaling. Finally, include the PubNub WebRTC SDK which makes placing phone calls as simple as calling the `dial(number)` function.
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="https://cdn.pubnub.com/pubnub.min.js"></script>
+    <!-- fore the next src, please use latest CDN verion from PubNub JavaScript SDK Docs here: 
+         https://www.pubnub.com/docs/web-javascript/pubnub-javascript-sdk 
+    -->
+    <script src="https://cdn.pubnub.com/pubnub-3.16.5.min.js"></script>
     <script src="http://kevingleason.me/SimpleRTC/js/webrtc.js"></script>
 
 Now we are ready to write our calling functions for `login` and `makeCall`!
